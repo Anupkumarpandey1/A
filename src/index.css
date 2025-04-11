@@ -1,171 +1,182 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 210 10% 20%;
-
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 210 10% 20%;
-
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 10% 20%;
-
-    --primary: 220 90% 56%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 10% 85%;
-    --secondary-foreground: 210 10% 20%;
-
-    --muted: 210 15% 95%;
-    --muted-foreground: 210 10% 40%;
-
-    --accent: 160 60% 70%;
-    --accent-foreground: 210 10% 20%;
-
-    --destructive: 0 80% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
-    --ring: 220 90% 56%;
-
-    --radius: 0.5rem;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 120 10% 10%;
-    --foreground: 54 100% 90%;
-
-    --card: 120 10% 10%;
-    --card-foreground: 54 100% 90%;
-
-    --popover: 120 10% 10%;
-    --popover-foreground: 54 100% 90%;
-
-    --primary: 160 100% 50%;
-    --primary-foreground: 120 10% 10%;
-
-    --secondary: 54 100% 60%;
-    --secondary-foreground: 120 10% 10%;
-
-    --muted: 120 10% 25%;
-    --muted-foreground: 120 10% 65%;
-
-    --accent: 100 100% 85%;
-    --accent-foreground: 120 10% 10%;
-
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 54 100% 90%;
-
-    --border: 120 10% 25%;
-    --input: 120 10% 25%;
-    --ring: 160 100% 50%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
-
 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
   }
-
-  .flashcard {
-    perspective: 1000px;
-  }
-
-  .flashcard-inner {
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-  }
-
-  .flashcard.flipped .flashcard-inner {
-    transform: rotateY(180deg);
-  }
-
-  .flashcard-front,
-  .flashcard-back {
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-  }
-
-  .flashcard-back {
-    transform: rotateY(180deg);
-  }
 }
 
-/* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+/* Flashcard animations and styling */
+.flashcard {
+  perspective: 1000px;
+  cursor: pointer;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.flashcard-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px 2px rgba(88, 114, 71, 0.4); }
-  50% { box-shadow: 0 0 20px 5px rgba(88, 114, 71, 0.7); }
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
 }
 
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.flashcard-front,
+.flashcard-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-.shimmer {
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+.flashcard-back {
+  transform: rotateY(180deg);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
-@keyframes shimmer {
-  0% { background-position: -100% 0; }
-  100% { background-position: 100% 0; }
+.dark .flashcard-back {
+  background-color: rgba(30, 30, 35, 0.95);
 }
 
-.card-hover-effect {
+/* Card hover effects */
+.hover-card {
   transition: all 0.3s ease;
 }
 
-.card-hover-effect:hover {
+.hover-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(88, 114, 71, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+.dark .hover-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient borders */
 .gradient-border {
   position: relative;
-  border-radius: var(--radius);
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
-.gradient-border::before {
+.gradient-border::after {
   content: '';
   position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #556b2f, #8b4513, #3d4c3f);
-  border-radius: calc(var(--radius) + 2px);
-  z-index: -1;
-  animation: border-rotate 3s linear infinite;
+  inset: 0;
+  padding: 2px;
+  border-radius: 0.75rem;
+  background: linear-gradient(to right, #3b82f6, #60a5fa);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
-@keyframes border-rotate {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Flowchart interactions */
+.node:hover {
+  filter: brightness(1.1);
+  transition: all 0.2s ease;
+}
+
+.node-active {
+  filter: brightness(0.8) !important;
+}
+
+/* Handwriting font for downloaded content */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
+
+.handwriting-font {
+  font-family: 'Caveat', cursive;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .mobile-menu-improved {
+    padding: 0.5rem;
+    margin: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-menu-improved svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  /* Larger touch targets for mobile */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
