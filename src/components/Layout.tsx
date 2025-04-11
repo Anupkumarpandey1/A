@@ -17,7 +17,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { Menu, X, BookOpen, Award, Swords, GitBranch, UserCheck, Check } from "lucide-react";
+import { Menu, X, BookOpen, Award, GitBranch, UserCheck, BrainCircuit, Sparkles } from "lucide-react";
 
 interface NavLinkProps {
   href: string;
@@ -29,7 +29,7 @@ interface NavLinkProps {
 
 const navLinks = [
   {
-    name: "Flashcards",
+    name: "Learning Hub",
     href: "/flashcards",
     icon: <BookOpen className="w-5 h-5" />,
   },
@@ -46,7 +46,7 @@ const navLinks = [
   {
     name: "Join Quiz",
     href: "/join",
-    icon: <Swords className="w-5 h-5" />,
+    icon: <UserCheck className="w-5 h-5" />,
   },
 ];
 
@@ -61,10 +61,10 @@ const NavLink = ({
     <Link
       to={href}
       className={cn(
-        "flex items-center gap-x-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors",
+        "flex items-center gap-x-2 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105",
         isActive
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+          ? "bg-gradient-to-r from-primary/80 to-accent/80 text-white shadow-md"
+          : "text-muted-foreground hover:text-foreground hover:bg-accent/20"
       )}
       onClick={onClick}
     >
@@ -86,11 +86,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
+        <div className="container flex h-16 items-center">
           <div className="mr-4 flex md:hidden">
             <Drawer open={open} onOpenChange={setOpen}>
               <DrawerTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
@@ -99,10 +99,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <div className="mx-auto w-full max-w-sm p-4">
                   <div className="flex items-center justify-between border-b mb-4 pb-4">
                     <Link to="/" className="flex items-center space-x-2">
-                      <span className="font-bold text-xl">QuizShare</span>
+                      <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">LearnFlow</span>
                     </Link>
                     <DrawerClose asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10">
                         <X className="h-5 w-5" />
                         <span className="sr-only">Close navigation menu</span>
                       </Button>
@@ -114,7 +114,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         {navLinks.map((link) => (
                           <DrawerClose key={link.href} asChild>
                             <CommandItem
-                              className="cursor-pointer"
+                              className="cursor-pointer rounded-lg mb-2 hover:bg-primary/10"
                               onSelect={() => {}}
                             >
                               <Link to={link.href} className="flex items-center w-full">
@@ -135,8 +135,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             to="/"
             className="flex items-center justify-center font-semibold text-lg"
           >
-            <Swords className="mr-2 h-5 w-5 text-primary" />
-            <span>LearnFlow</span>
+            <BrainCircuit className="mr-2 h-6 w-6 text-primary animate-pulse" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent font-bold">LearnFlow</span>
+            <Sparkles className="ml-1 h-4 w-4 text-accent/80" />
           </Link>
           <div className="flex-1" />
           <div className="hidden md:flex items-center gap-x-2">
@@ -159,10 +160,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
       <main className="flex-1 bg-background">
         {!mounted ? (
-          // Display a placeholder during hydration to avoid layout shifts
           <div className="min-h-[calc(100vh-56px)]"></div>
         ) : (
-          children
+          <div className="animate-fade-in">
+            {children}
+          </div>
         )}
       </main>
     </div>
