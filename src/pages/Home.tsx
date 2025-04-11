@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { BookOpen, Award, Users, BrainCircuit } from "lucide-react";
+import { BookOpen, Award, Users, BrainCircuit, GraduationCap } from "lucide-react";
 
 const FeatureCard = ({ icon, title, description, linkTo }: { 
   icon: React.ReactNode, 
@@ -128,7 +128,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-16 bg-primary/5">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <BrainCircuit className="h-16 w-16 text-primary mx-auto mb-6" />
+          <GraduationCap className="h-16 w-16 text-primary mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Ready to supercharge your learning?</h2>
           <p className="text-muted-foreground mb-8">
             Start generating flashcards, notes, and interactive quizzes today.

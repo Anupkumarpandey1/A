@@ -17,7 +17,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { Menu, X, BookOpen, Award, GitBranch, UserCheck, BrainCircuit, Sparkles } from "lucide-react";
+import { Menu, X, BookOpen, Award, GitBranch, UserCheck, GraduationCap, Sparkles } from "lucide-react";
 
 interface NavLinkProps {
   href: string;
@@ -135,9 +135,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             to="/"
             className="flex items-center justify-center font-semibold text-lg"
           >
-            <BrainCircuit className="mr-2 h-6 w-6 text-primary animate-pulse" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent font-bold">LearnFlow</span>
-            <Sparkles className="ml-1 h-4 w-4 text-accent/80" />
+            <GraduationCap className="mr-2 h-6 w-6 text-primary animate-pulse" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent font-bold">Barrack</span>
           </Link>
           <div className="flex-1" />
           <div className="hidden md:flex items-center gap-x-2">

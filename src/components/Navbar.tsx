@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { 
   Menu, 
   X, 
-  BrainCircuit, 
   BookOpen, 
   UserRound, 
   Award,
@@ -48,7 +47,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: "Home", path: "/", icon: <Home className="h-4 w-4 mr-2" /> },
-    { name: "Learning Hub", path: "/learning-hub", icon: <BrainCircuit className="h-4 w-4 mr-2" /> },
+    { name: "Learning Hub", path: "/learning-hub", icon: <GraduationCap className="h-4 w-4 mr-2" /> },
     { name: "Flashcards", path: "/flashcards", icon: <BookOpen className="h-4 w-4 mr-2" /> },
     { name: "Flowcharts", path: "/flowcharts", icon: <GitBranch className="h-4 w-4 mr-2" /> },
     { name: "Quizzes", path: "/quizzes", icon: <Award className="h-4 w-4 mr-2" /> },
@@ -66,7 +65,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
-                <BrainCircuit className="h-8 w-8 text-white" />
+                <GraduationCap className="h-8 w-8 text-white" />
                 <span className="ml-2 text-xl font-bold text-white hidden sm:block">LearnFlow</span>
               </Link>
             </div>
@@ -107,7 +106,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="px-3 py-2 h-auto text-white hover:bg-white/10">
                     <span className="flex items-center">
-                      <BrainCircuit className="h-4 w-4 mr-2" />
+                      <GraduationCap className="h-4 w-4 mr-2" />
                       Tools
                       <ChevronDown className="h-4 w-4 ml-1" />
                     </span>
@@ -116,7 +115,7 @@ const Navbar = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link to="/learning-hub" className="flex items-center cursor-pointer">
-                      <BrainCircuit className="h-4 w-4 mr-2" />
+                      <GraduationCap className="h-4 w-4 mr-2" />
                       Learning Hub
                     </Link>
                   </DropdownMenuItem>
