@@ -10,6 +10,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Quizzes from "./pages/Quizzes";
+import Flowcharts from "./pages/Flowcharts";
 
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/flashcards" element={<Flashcards />} />
                 <Route path="/quizzes" element={<Quizzes />} />
+                <Route path="/flowcharts" element={<Flowcharts />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>

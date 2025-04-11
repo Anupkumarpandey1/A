@@ -41,16 +41,30 @@ const flashcardStyles = `
     padding: 1.5rem;
   }
   
+@layer base {
   .flashcard-front {
     background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
     border: 1px solid rgba(129, 140, 248, 0.2);
   }
-  
+
   .flashcard-back {
     background: linear-gradient(135deg, #ede9f6 0%, #e8f2ff 100%);
     transform: rotateY(180deg);
     border: 1px solid rgba(139, 92, 246, 0.3);
   }
+
+  .dark .flashcard-front {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    border: 1px solid rgba(94, 234, 212, 0.2); /* teal accent */
+  }
+
+  .dark .flashcard-back {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    border: 1px solid rgba(253, 224, 71, 0.25); /* soft yellow accent */
+    transform: rotateY(180deg);
+  }
+}
+
 `;
 
 interface FlashcardItem {
@@ -88,7 +102,6 @@ const Flashcards = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call with dummy data
       const dummyFlashcards: FlashcardItem[] = [
         { id: '1', question: 'Sample Question 1', answer: 'Sample Answer 1' },
         { id: '2', question: 'Sample Question 2', answer: 'Sample Answer 2' },
@@ -184,9 +197,10 @@ const Flashcards = () => {
       <style>{flashcardStyles}</style>
       
       <div className="mb-8 text-center max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-500">
-          Flashcards & Study Notes
-        </h1>
+      <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-[hsl(220,90%,56%)] to-[hsl(160,60%,70%)]">
+      Flashcards & Study Notes
+      </h1>
+
         <p className="text-muted-foreground">
           Generate interactive flashcards and concise study notes from any text.
         </p>
