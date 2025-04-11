@@ -1,15 +1,12 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, RefreshCw, BookOpen, StickyNote, RotateCw, Download, FileText, Youtube, Upload } from "lucide-react";
+import { Loader2, RefreshCw, BookOpen, StickyNote, RotateCw, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-
 
 const flashcardStyles = `
   .flashcard {
@@ -56,19 +53,25 @@ const flashcardStyles = `
   }
 `;
 
+interface FlashcardItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+interface NotesItem {
+  id: string;
+  title: string;
+  content: string;
+}
+
 const Flashcards = () => {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [flashcards, setFlashcards] = useState<FlashcardItem[]>([]);
   const [notes, setNotes] = useState<NotesItem[]>([]);
-  const [activeTab, setActiveTab] = useState("text");
   const [outputTab, setOutputTab] = useState("flashcards");
   const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
-  const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [isProcessingMedia, setIsProcessingMedia] = useState(false);
-  const [videoSummary, setVideoSummary] = useState<VideoSummary | null>(null);
-  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-  const [keyPoints, setKeyPoints] = useState<string[]>([]);
   
   const { toast } = useToast();
 
@@ -85,18 +88,19 @@ const Flashcards = () => {
     setIsLoading(true);
 
     try {
-      // First, generate key points
-      const extractedKeyPoints = await generateKeyPoints(inputText);
-      setKeyPoints(extractedKeyPoints);
+      // Simulate API call with dummy data
+      const dummyFlashcards: FlashcardItem[] = [
+        { id: '1', question: 'Sample Question 1', answer: 'Sample Answer 1' },
+        { id: '2', question: 'Sample Question 2', answer: 'Sample Answer 2' },
+      ];
       
-      // Then generate flashcards and notes
-      const [flashcardsData, notesData] = await Promise.all([
-        generateFlashcards(inputText),
-        generateNotes(inputText),
-      ]);
+      const dummyNotes: NotesItem[] = [
+        { id: '1', title: 'Section 1', content: 'Sample content for section 1' },
+        { id: '2', title: 'Section 2', content: 'Sample content for section 2' },
+      ];
 
-      setFlashcards(flashcardsData);
-      setNotes(notesData);
+      setFlashcards(dummyFlashcards);
+      setNotes(dummyNotes);
       setOutputTab("flashcards");
       
       toast({
@@ -108,125 +112,6 @@ const Flashcards = () => {
       toast({
         title: "Generation failed",
         description: "There was an error generating your content. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const processYouTubeVideo = async () => {
-    if (!youtubeUrl) {
-      toast({
-        title: "YouTube URL required",
-        description: "Please enter a valid YouTube URL.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingMedia(true);
-    setIsGeneratingSummary(true);
-    
-    try {
-      // Extract transcript
-      const transcript = await extractYouTubeTranscript(youtubeUrl);
-      setInputText(transcript.text);
-      
-      // Generate summary
-      const summary = await generateVideoSummary(transcript.text);
-      setVideoSummary(summary);
-      
-      // Generate key points
-      const extractedKeyPoints = await generateKeyPoints(transcript.text);
-      setKeyPoints(extractedKeyPoints);
-      
-      toast({
-        title: "YouTube summary created",
-        description: "The video transcript has been processed and summarized.",
-      });
-    } catch (error) {
-      console.error("Error processing YouTube video:", error);
-      toast({
-        title: "YouTube processing failed",
-        description: "There was an error extracting the transcript. Please check the URL and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingMedia(false);
-      setIsGeneratingSummary(false);
-      setActiveTab("text");
-    }
-  };
-
-  const handleDocumentUpload = async (content: string, fileName: string) => {
-    setInputText(content);
-    setActiveTab("text");
-    
-    try {
-      // Generate key points
-      const extractedKeyPoints = await generateKeyPoints(content);
-      setKeyPoints(extractedKeyPoints);
-      
-      toast({
-        title: "Document processed",
-        description: `${fileName} has been processed successfully.`,
-      });
-    } catch (error) {
-      console.error("Error processing document:", error);
-      toast({
-        title: "Processing failed",
-        description: "There was an error processing the document.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const generateFlashcardsFromKeyPoints = async (keyPoints: string[]) => {
-    setIsLoading(true);
-    
-    try {
-      const keyPointsText = keyPoints.join("\n\n");
-      const flashcardsData = await generateFlashcards(keyPointsText);
-      
-      setFlashcards(flashcardsData);
-      setOutputTab("flashcards");
-      
-      toast({
-        title: "Flashcards generated",
-        description: "Flashcards based on the key points have been created.",
-      });
-    } catch (error) {
-      console.error("Error generating flashcards:", error);
-      toast({
-        title: "Generation failed",
-        description: "There was an error generating your flashcards.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const generateNotesFromKeyPoints = async (keyPoints: string[]) => {
-    setIsLoading(true);
-    
-    try {
-      const keyPointsText = keyPoints.join("\n\n");
-      const notesData = await generateNotes(keyPointsText);
-      
-      setNotes(notesData);
-      setOutputTab("notes");
-      
-      toast({
-        title: "Notes generated",
-        description: "Study notes based on the key points have been created.",
-      });
-    } catch (error) {
-      console.error("Error generating notes:", error);
-      toast({
-        title: "Generation failed",
-        description: "There was an error generating your notes.",
         variant: "destructive",
       });
     } finally {
@@ -294,62 +179,16 @@ const Flashcards = () => {
     });
   };
 
-  const downloadNotesAsDoc = () => {
-    if (notes.length === 0) return;
-    
-    // Create HTML content for Word document
-    let htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Study Notes</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
-          h1 { color: #333; text-align: center; margin-bottom: 30px; }
-          h2 { color: #444; margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-          p { line-height: 1.5; }
-        </style>
-      </head>
-      <body>
-        <h1>Study Notes</h1>
-    `;
-    
-    notes.forEach((note) => {
-      htmlContent += `<h2>${note.title}</h2>`;
-      htmlContent += `<p>${note.content.replace(/\n/g, '<br>')}</p>`;
-      htmlContent += `<hr style="margin: 20px 0;">`;
-    });
-    
-    htmlContent += `
-      </body>
-      </html>
-    `;
-    
-    // Create a Blob with the HTML content
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-word' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "study_notes.doc";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Notes downloaded",
-      description: "Your study notes have been downloaded as a Word document.",
-    });
-  };
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <style>{flashcardStyles}</style>
       
       <div className="mb-8 text-center max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-500">Flashcards & Study Notes</h1>
+        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-500">
+          Flashcards & Study Notes
+        </h1>
         <p className="text-muted-foreground">
-          Generate interactive flashcards and concise study notes from any text or content.
+          Generate interactive flashcards and concise study notes from any text.
         </p>
       </div>
 
@@ -357,89 +196,22 @@ const Flashcards = () => {
         <div>
           <Card className="p-6 border-primary/20 shadow-lg hover:shadow-primary/5 transition-all">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <FileText className="mr-2 h-5 w-5 text-primary" />
+              <BookOpen className="mr-2 h-5 w-5 text-primary" />
               <span>Input Content</span>
             </h2>
-            <Tabs defaultValue="text" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4 bg-muted/50">
-                <TabsTrigger value="text" className="data-[state=active]:bg-primary/10">Text</TabsTrigger>
-                <TabsTrigger value="document" className="data-[state=active]:bg-primary/10">Document</TabsTrigger>
-                <TabsTrigger value="youtube" className="data-[state=active]:bg-primary/10">YouTube</TabsTrigger>
-                {videoSummary && <TabsTrigger value="summary" className="data-[state=active]:bg-primary/10">Summary</TabsTrigger>}
-              </TabsList>
-              
-              <TabsContent value="text">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="input-text" className="text-sm font-medium">Enter your text</Label>
-                    <Textarea
-                      id="input-text"
-                      placeholder="Paste your text here to generate flashcards and notes..."
-                      className="h-56 resize-none focus:ring-primary/30 border-primary/20"
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="document">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="document-upload">Upload PDF, DOC, or Text File</Label>
-                    <FileUpload 
-                      onFileContent={handleDocumentUpload}
-                      accept=".pdf,.doc,.docx,.txt"
-                      label="Upload Document"
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="youtube">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="youtube-url">YouTube Video URL</Label>
-                    <Input
-                      id="youtube-url"
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      className="focus:ring-primary/30 border-primary/20 mb-2"
-                      value={youtubeUrl}
-                      onChange={(e) => setYoutubeUrl(e.target.value)}
-                      disabled={isProcessingMedia}
-                    />
-                    <Button 
-                      onClick={processYouTubeVideo} 
-                      disabled={isProcessingMedia || !youtubeUrl}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {isProcessingMedia ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {isGeneratingSummary ? "Generating Summary..." : "Extracting Transcript..."}
-                        </>
-                      ) : (
-                        <>
-                          <Youtube className="mr-2 h-4 w-4" />
-                          Extract & Summarize Video
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              {videoSummary && (
-                <TabsContent value="summary">
-                  <YouTubeSummary 
-                    summary={videoSummary} 
-                    onGenerateFlashcards={generateFlashcardsFromKeyPoints}
-                    onGenerateFlowchart={generateNotesFromKeyPoints}
-                  />
-                </TabsContent>
-              )}
-            </Tabs>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="input-text" className="text-sm font-medium">Enter your text</Label>
+                <Textarea
+                  id="input-text"
+                  placeholder="Paste your text here to generate flashcards and notes..."
+                  className="h-56 resize-none focus:ring-primary/30 border-primary/20"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                />
+              </div>
+            </div>
             
             <div className="mt-6">
               <Button
@@ -460,39 +232,6 @@ const Flashcards = () => {
                 )}
               </Button>
             </div>
-            
-            {keyPoints.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-border/50">
-                <h3 className="text-sm font-medium mb-2 flex items-center">
-                  <StickyNote className="mr-2 h-4 w-4 text-primary" />
-                  Key Points
-                </h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                  {keyPoints.map((point, index) => (
-                    <li key={index}>{point}</li>
-                  ))}
-                </ul>
-                
-                <div className="flex space-x-2 mt-4">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => generateFlashcardsFromKeyPoints(keyPoints)}
-                    className="text-xs"
-                  >
-                    Generate Flashcards
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => generateNotesFromKeyPoints(keyPoints)}
-                    className="text-xs"
-                  >
-                    Generate Notes
-                  </Button>
-                </div>
-              </div>
-            )}
           </Card>
         </div>
 
@@ -614,26 +353,15 @@ const Flashcards = () => {
                       Download Markdown
                     </Button>
                   ) : (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={downloadNotes}
-                        className="border-primary/20 hover:bg-primary/5"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Markdown
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={downloadNotesAsDoc}
-                        className="border-primary/20 hover:bg-primary/5"
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Word Doc
-                      </Button>
-                    </>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={downloadNotes}
+                      className="border-primary/20 hover:bg-primary/5"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Markdown
+                    </Button>
                   )}
                 </div>
               </div>
