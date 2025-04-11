@@ -30,7 +30,7 @@ const App = () => {
                 <Route path="/quizzes" element={<Quizzes />} />
                 <Route path="/flowcharts" element={<Flowcharts />} />
                 <Route path="/join" element={<JoinQuiz />} />
-                <Route path="/join-quiz/:sessionId" element={<JoinQuiz />} />
+                <Route path="/join/:sessionId" element={<JoinQuiz />} />
                 <Route path="/play/:sessionId" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

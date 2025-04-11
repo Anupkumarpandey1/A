@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,25 +21,18 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// Simple placeholder for MermaidRenderer
-const MermaidRenderer = ({ chart, className, title }) => (
-  <div className={className}>
-    <p className="text-center mb-4">Mermaid chart visualization placeholder</p>
-    <pre className="p-4 bg-muted text-xs rounded-md">
-      <code>{chart}</code>
-    </pre>
-  </div>
-);
-
-// Define minimal types
-interface FlowchartData {
-  id: string;
-  title: string;
-  mermaidCode: string;
-  content: string;
-  createdAt: Date;
-}
+import MermaidRenderer from "@/components/MermaidRenderer";
+import { FlowchartData, generateFlowchart, saveFlowchart } from "@/services/flowchartService";
+import { extractYouTubeTranscript } from "@/services/youtubeService";
+import { 
+  extractPDFContent, 
+  extractPDFContentFromUrl, 
+  extractDocContent,
+  extractKeywordsAndCorrelations,
+  generateMermaidFromKeywords
+} from "@/services/pdfService";
+import { generateVideoSummary, VideoSummary } from "@/services/summaryService";
+import { YouTubeSummary } from "@/components/YouTubeSummary";
 
 const Flowcharts = () => {
   const [inputText, setInputText] = useState("");
@@ -48,9 +42,13 @@ const Flowcharts = () => {
   const [flowchartData, setFlowchartData] = useState<FlowchartData | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [pdfUrl, setPdfUrl] = useState("");
+  const [isProcessingMedia, setIsProcessingMedia] = useState(false);
+  const [isAnalyzingDocument, setIsAnalyzingDocument] = useState(false);
+  const [videoSummary, setVideoSummary] = useState<VideoSummary | null>(null);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [mobileView, setMobileView] = useState<"input" | "preview">("input");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isMobile = false; // Simplified from useIsMobile()
+  const isMobile = useIsMobile();
   
   const { toast } = useToast();
 
@@ -67,16 +65,12 @@ const Flowcharts = () => {
     setIsLoading(true);
 
     try {
-      // Simplified mock implementation
-      const generatedFlowchart: FlowchartData = {
-        id: `flowchart-${Date.now()}`,
-        title: flowchartTitle || "Generated Flowchart",
-        mermaidCode: `graph TD\n  A[Start] --> B[Process]\n  B --> C[End]`,
-        content: inputText,
-        createdAt: new Date()
-      };
-      
+      const generatedFlowchart = await generateFlowchart(inputText);
       setFlowchartData(generatedFlowchart);
+      setFlowchartTitle(generatedFlowchart.title);
+      
+      // Save the flowchart
+      saveFlowchart(generatedFlowchart);
       
       toast({
         title: "Flowchart generation complete",
@@ -96,6 +90,170 @@ const Flowcharts = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const processYouTubeVideo = async () => {
+    if (!youtubeUrl) {
+      toast({
+        title: "YouTube URL required",
+        description: "Please enter a valid YouTube URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingMedia(true);
+    setIsGeneratingSummary(true);
+    
+    try {
+      // Step 1: Extract transcript
+      const transcript = await extractYouTubeTranscript(youtubeUrl);
+      setInputText(transcript.text);
+      
+      // Step 2: Generate summary with Gemini
+      const summary = await generateVideoSummary(transcript.text);
+      setVideoSummary(summary);
+      
+      toast({
+        title: "YouTube summary created",
+        description: "The video transcript has been processed and summarized.",
+      });
+    } catch (error) {
+      console.error("Error processing YouTube video:", error);
+      toast({
+        title: "YouTube processing failed",
+        description: "There was an error extracting the transcript. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingMedia(false);
+      setIsGeneratingSummary(false);
+      setActiveTab("text");
+    }
+  };
+
+  const processPDFDocument = async () => {
+    if (!pdfUrl) {
+      toast({
+        title: "PDF URL required",
+        description: "Please enter a valid PDF URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingMedia(true);
+    setIsAnalyzingDocument(true);
+    
+    try {
+      // Step 1: Extract text content from PDF
+      const pdfContent = await extractPDFContentFromUrl(pdfUrl);
+      setInputText(pdfContent.text);
+      setFlowchartTitle(pdfContent.title || "PDF Flowchart");
+      
+      // Step 2: Extract keywords and correlations
+      const keywordData = await extractKeywordsAndCorrelations(pdfContent.text);
+      
+      // Step 3: Generate Mermaid flowchart from keywords
+      const mermaidCode = await generateMermaidFromKeywords(keywordData);
+      
+      // Step 4: Set the flowchart data
+      const generatedFlowchart: FlowchartData = {
+        id: `flowchart-${Date.now()}`,
+        title: pdfContent.title || "PDF Flowchart",
+        mermaidCode: mermaidCode,
+        content: pdfContent.text,
+        createdAt: new Date()
+      };
+      
+      setFlowchartData(generatedFlowchart);
+      saveFlowchart(generatedFlowchart);
+      
+      // Switch to preview on mobile
+      if (isMobile) {
+        setMobileView("preview");
+      }
+      
+      toast({
+        title: "PDF analysis complete",
+        description: "Keywords and correlations have been extracted and a flowchart has been generated.",
+      });
+    } catch (error) {
+      console.error("Error processing PDF:", error);
+      toast({
+        title: "PDF processing failed",
+        description: "There was an error extracting the text. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingMedia(false);
+      setIsAnalyzingDocument(false);
+      setActiveTab("text");
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    setIsProcessingMedia(true);
+    setIsAnalyzingDocument(true);
+    
+    try {
+      let content;
+      if (file.type === "application/pdf") {
+        content = await extractPDFContent(file);
+      } else if (file.type.includes("document") || file.name.endsWith(".docx") || file.name.endsWith(".doc")) {
+        content = await extractDocContent(file);
+      } else {
+        throw new Error("Unsupported file type. Please upload a PDF or Word document.");
+      }
+      
+      setInputText(content.text);
+      setFlowchartTitle(content.title);
+      
+      // Extract keywords and correlations
+      const keywordData = await extractKeywordsAndCorrelations(content.text);
+      
+      // Generate Mermaid flowchart from keywords
+      const mermaidCode = await generateMermaidFromKeywords(keywordData);
+      
+      // Set the flowchart data
+      const generatedFlowchart: FlowchartData = {
+        id: `flowchart-${Date.now()}`,
+        title: content.title || "Document Flowchart",
+        mermaidCode: mermaidCode,
+        content: content.text,
+        createdAt: new Date()
+      };
+      
+      setFlowchartData(generatedFlowchart);
+      saveFlowchart(generatedFlowchart);
+      
+      // Switch to preview on mobile
+      if (isMobile) {
+        setMobileView("preview");
+      }
+      
+      toast({
+        title: "Document analysis complete",
+        description: `${file.name} has been processed and a flowchart has been generated.`,
+      });
+    } catch (error) {
+      console.error("Error processing document:", error);
+      toast({
+        title: "Document processing failed",
+        description: error instanceof Error ? error.message : "Failed to process the document.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingMedia(false);
+      setIsAnalyzingDocument(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -127,6 +285,41 @@ const Flowcharts = () => {
         title: "Mermaid code downloaded",
         description: "Your flowchart code has been downloaded.",
       });
+    }
+  };
+
+  const generateFlowchartFromKeyPoints = async (keyPoints: string[]) => {
+    setIsLoading(true);
+    
+    try {
+      // Join key points into a single text for processing
+      const keyPointsText = keyPoints.join("\n\n");
+      const generatedFlowchart = await generateFlowchart(keyPointsText);
+      
+      setFlowchartData(generatedFlowchart);
+      setFlowchartTitle(generatedFlowchart.title);
+      
+      // Save the flowchart
+      saveFlowchart(generatedFlowchart);
+      
+      // Switch to preview on mobile
+      if (isMobile) {
+        setMobileView("preview");
+      }
+      
+      toast({
+        title: "Flowchart generated",
+        description: "A flowchart based on the key points has been created.",
+      });
+    } catch (error) {
+      console.error("Error generating flowchart:", error);
+      toast({
+        title: "Generation failed",
+        description: "There was an error generating your flowchart.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -184,6 +377,9 @@ const Flowcharts = () => {
               <Tabs defaultValue="text" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="mb-4 bg-muted/50">
                   <TabsTrigger value="text" className="data-[state=active]:bg-primary/10">Text</TabsTrigger>
+                  <TabsTrigger value="document" className="data-[state=active]:bg-primary/10">Document</TabsTrigger>
+                  <TabsTrigger value="youtube" className="data-[state=active]:bg-primary/10">YouTube</TabsTrigger>
+                  {videoSummary && <TabsTrigger value="summary" className="data-[state=active]:bg-primary/10">Summary</TabsTrigger>}
                 </TabsList>
                 
                 <TabsContent value="text">
@@ -200,6 +396,110 @@ const Flowcharts = () => {
                     </div>
                   </div>
                 </TabsContent>
+                
+                <TabsContent value="document">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="pdf-url">PDF URL</Label>
+                      <Input
+                        id="pdf-url"
+                        placeholder="https://example.com/document.pdf"
+                        className="focus:ring-primary/30 border-primary/20 mb-2"
+                        value={pdfUrl}
+                        onChange={(e) => setPdfUrl(e.target.value)}
+                        disabled={isProcessingMedia}
+                      />
+                      <Button 
+                        onClick={processPDFDocument} 
+                        disabled={isProcessingMedia || !pdfUrl}
+                        variant="outline"
+                        className="w-full mb-4"
+                      >
+                        {isProcessingMedia ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {isAnalyzingDocument ? "Analyzing Document..." : "Processing PDF..."}
+                          </>
+                        ) : (
+                          "Extract & Analyze PDF"
+                        )}
+                      </Button>
+                      
+                      <div className="text-center p-4 border-2 border-dashed border-primary/20 rounded-lg">
+                        <Upload className="h-8 w-8 mx-auto text-primary/50 mb-2" />
+                        <p className="text-sm text-muted-foreground mb-2">Upload a PDF or document file</p>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          disabled={isProcessingMedia}
+                        />
+                        <Button 
+                          onClick={() => fileInputRef.current?.click()} 
+                          disabled={isProcessingMedia}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isProcessingMedia ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              {isAnalyzingDocument ? "Analyzing..." : "Processing..."}
+                            </>
+                          ) : (
+                            "Select File"
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="youtube">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="youtube-url">YouTube Video URL</Label>
+                      <Input
+                        id="youtube-url"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="focus:ring-primary/30 border-primary/20 mb-2"
+                        value={youtubeUrl}
+                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                        disabled={isProcessingMedia}
+                      />
+                      <Button 
+                        onClick={processYouTubeVideo} 
+                        disabled={isProcessingMedia || !youtubeUrl}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {isProcessingMedia ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {isGeneratingSummary ? "Generating Summary..." : "Extracting Transcript..."}
+                          </>
+                        ) : (
+                          <>
+                            <Youtube className="mr-2 h-4 w-4" />
+                            Extract & Summarize Video
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                {videoSummary && (
+                  <TabsContent value="summary">
+                    <ScrollArea className="max-h-[300px]">
+                      <YouTubeSummary 
+                        summary={videoSummary} 
+                        onGenerateFlowchart={generateFlowchartFromKeyPoints}
+                      />
+                    </ScrollArea>
+                  </TabsContent>
+                )}
               </Tabs>
               
               <Separator className="my-4" />

@@ -5,12 +5,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Award, Swords, AlertCircle, Loader2 } from "lucide-react";
+import { Award, AlertCircle, Loader2 } from "lucide-react";
 
-// Function to get quiz session
+// Local implementation of getQuizSession
 const getQuizSession = async (id: string) => {
   try {
-    return { title: "Quiz Session" };
+    // Mock implementation
+    return { 
+      id: id,
+      title: "Quiz Session" 
+    };
   } catch (error) {
     console.error("Error fetching quiz session:", error);
     return null;
@@ -106,7 +110,7 @@ const JoinQuiz = () => {
       <Card className="max-w-md mx-auto p-6 border-primary/20 shadow-lg hover:shadow-primary/5 transition-all">
         <div className="text-center mb-6">
           <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Swords className="h-8 w-8 text-primary" />
+            <Award className="h-8 w-8 text-primary" />
           </div>
           
           {quizTitle && (
