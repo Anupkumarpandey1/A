@@ -9,6 +9,8 @@ import Flashcards from "./pages/Flashcards";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import Quizzes from "./pages/Quizzes";
+
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/flashcards" element={<Flashcards />} />
+                <Route path="/quizzes" element={<Quizzes />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
