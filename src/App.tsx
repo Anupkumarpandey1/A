@@ -29,8 +29,8 @@ const App = () => {
                 <Route path="/flashcards" element={<Flashcards />} />
                 <Route path="/quizzes" element={<Quizzes />} />
                 <Route path="/flowcharts" element={<Flowcharts />} />
-                <Route path="/joinquiz" element={<JoinQuiz />} />
-                <Route path="/joinquiz/:sessionId" element={<JoinQuiz />} />
+                <Route path="/join" element={<JoinQuiz />} />
+                <Route path="/join-quiz/:sessionId" element={<JoinQuiz />} />
                 <Route path="/play/:sessionId" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
