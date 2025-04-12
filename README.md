@@ -58,7 +58,7 @@ Whether you're learning solo or with friends, LearnflowBarracks supercharges you
 
 ```bash
 # 1. Clone the repo
-git clone <YOUR_REPO_URL>
+git clone https://github.com/Rudramani1/Devolympus.git
 
 # 2. Navigate to the project
 cd LearnflowBarracks
