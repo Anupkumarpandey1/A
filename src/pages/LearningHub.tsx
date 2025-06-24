@@ -33,6 +33,7 @@ import { FlashcardItem, NotesItem, FlowchartData } from "@/types/quizTypes";
 import { downloadSummaryAsDocument } from "@/services/summaryService";
 import MediaInput from "@/components/MediaInput";
 import { saveAs } from "file-saver";
+import mermaid from "mermaid";
 
 const LearningHub = () => {
   const [activeTab, setActiveTab] = useState("flashcards");
@@ -470,45 +471,55 @@ const LearningHub = () => {
   };
 
   const getFlowchartSvgDataUrl = () => {
-    if (!flowchartRef.current || !flowchart) return null;
-    
-    const svgElement = flowchartRef.current.querySelector("svg");
-    if (!svgElement) return null;
-    
-    const svgCopy = svgElement.cloneNode(true) as SVGElement;
-    svgCopy.setAttribute("width", "800");
-    svgCopy.setAttribute("height", "600");
-    svgCopy.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    
-    // Make svg self-contained by adding styles
-    const style = document.createElement('style');
-    style.textContent = `
-      .node rect, .node circle, .node ellipse, .node polygon, .cluster rect {
-        fill: #f0f9ff;
-        stroke: #93c5fd;
-        stroke-width: 1px;
+    if (!flowchart) return null;
+    // Use mermaid.render to generate SVG from code
+    let svgString = "";
+    let diagramId = `download-mermaid-diagram-${Date.now()}`;
+    try {
+      mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose", flowchart: { useMaxWidth: true, htmlLabels: true } });
+      // Synchronous rendering is not available, so use a Promise and block with then (since this is only for download)
+      mermaid.render(diagramId, flowchart.mermaidCode.trim().startsWith('graph') ? flowchart.mermaidCode : 'graph TD\n' + flowchart.mermaidCode, (svg) => {
+        svgString = svg;
+      });
+      if (!svgString) return null;
+      // Add width/height and styles for Word compatibility
+      const svgDoc = new DOMParser().parseFromString(svgString, "image/svg+xml");
+      const svgElem = svgDoc.querySelector("svg");
+      if (svgElem) {
+        svgElem.setAttribute("width", "800");
+        svgElem.setAttribute("height", "600");
+        svgElem.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        // Add custom styles
+        const style = svgDoc.createElementNS("http://www.w3.org/2000/svg", "style");
+        style.textContent = `
+          .node rect, .node circle, .node ellipse, .node polygon, .cluster rect {
+            fill: #f0f9ff;
+            stroke: #93c5fd;
+            stroke-width: 1px;
+          }
+          .node.clickable {
+            cursor: pointer;
+          }
+          .arrowheadPath {
+            fill: #3b82f6;
+          }
+          .edgePath .path {
+            stroke: #3b82f6;
+            stroke-width: 2px;
+          }
+          .flowchart-label text {
+            fill: #1e40af;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          }
+        `;
+        svgElem.appendChild(style);
+        svgString = new XMLSerializer().serializeToString(svgElem);
       }
-      .node.clickable {
-        cursor: pointer;
-      }
-      .arrowheadPath {
-        fill: #3b82f6;
-      }
-      .edgePath .path {
-        stroke: #3b82f6;
-        stroke-width: 2px;
-      }
-      .flowchart-label text {
-        fill: #1e40af;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-    `;
-    svgCopy.appendChild(style);
-    
-    const svgString = new XMLSerializer().serializeToString(svgCopy);
-    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-    
-    return dataUrl;
+      const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+      return dataUrl;
+    } catch (err) {
+      return null;
+    }
   };
 
   const downloadAllContent = () => {
@@ -593,8 +604,8 @@ const LearningHub = () => {
       if (flowchartDataUrl) {
         htmlContent += `
         <h2>Visual Concept Map</h2>
-        <div class="flowchart-container">
-          <img class="flowchart-image" src="${flowchartDataUrl}" alt="${flowchart.title}" />
+        <div class="flowchart-container" style="text-align:center;">
+          <img class="flowchart-image" src="${flowchartDataUrl}" alt="${flowchart.title}" style="display:block;margin:0 auto;max-width:90%;height:auto;border:2px solid #93c5fd;border-radius:10px;" />
           <p><em>${flowchart.title}</em></p>
         </div>
         <div class="page-break"></div>
@@ -604,7 +615,7 @@ const LearningHub = () => {
         <h2>Visual Concept Map</h2>
         <div class="flowchart-container">
           <p style="color: #6b7280; font-style: italic; padding: 20px; border: 1px dashed #93c5fd; border-radius: 10px; text-align: center;">
-            Flowchart "${flowchart.title}" is available in the original document.
+            Flowchart image could not be embedded. Please download the SVG separately.
           </p>
         </div>
         <div class="page-break"></div>

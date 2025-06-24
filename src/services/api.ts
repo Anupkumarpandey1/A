@@ -1,6 +1,5 @@
-
 // API keys (in production these should be secured in environment variables or server-side)
-export const GEMINI_API_KEY = "AIzaSyB7RRqKHgGHD2AGPp2mht81ZTbeO--Nb2M";
+export const GEMINI_API_KEY = "AIzaSyAkufDKqoXYUuYupmKxeJ3z36p4Y0Wwr04";
 export const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 export const RAPID_API_KEY = "88e9d73b57msh9982c178daafdb7p1d1688jsn6d4186f6ca5a";
 

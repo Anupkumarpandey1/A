@@ -1,5 +1,6 @@
-
 import { RAPID_API_KEY } from "./api";
+
+const SUPADATA_API_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IjEifQ.eyJpc3MiOiJuYWRsZXMiLCJpYXQiOiIxNzQzNTc3NzMzIiwicHVycG9zZSI6ImFwaV9hdXRoZW50aWNhdGlvbiIsInN1YiI6ImUwZDBmMTM3YTYyYTRiYzA4NGRlMTdhMWViZmRjNWUwIn0.5wSvZVmp3s7VOTT8khMKyM3jk74wj0n2ud91o1MEwT4";
 
 export interface YouTubeTranscript {
   text: string;
@@ -11,73 +12,43 @@ export const extractYouTubeTranscript = async (videoUrl: string): Promise<YouTub
   try {
     // Extract video ID from URL
     const videoId = extractVideoId(videoUrl);
-    
     if (!videoId) {
       throw new Error('Invalid YouTube URL');
     }
-    
-    // Use Promise with timeout for faster response handling
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Request timed out after 15 seconds'));
-      }, 15000);
-      
-      const xhr = new XMLHttpRequest();
-      xhr.withCredentials = true;
-      
-      xhr.addEventListener('readystatechange', function () {
-        if (this.readyState === this.DONE) {
-          clearTimeout(timeout);
-          
-          if (this.status >= 200 && this.status < 300) {
-            try {
-              // Parse the response text to JSON
-              const response = JSON.parse(this.responseText);
-              
-              // Extract transcript text from the response quickly
-              let transcriptText = "";
-              if (response.transcript) {
-                transcriptText = response.transcript;
-              } else if (response.segments) {
-                // Faster concatenation for segments
-                transcriptText = response.segments.map((segment: any) => segment.text).join(' ');
-              } else {
-                console.warn("Unexpected API response format:", response);
-                transcriptText = this.responseText;
-              }
-              
-              resolve({
-                text: transcriptText,
-                videoId,
-                videoTitle: response.title || "YouTube Video",
-              });
-            } catch (error) {
-              console.error("Error parsing response:", error, "Response:", this.responseText);
-              // If JSON parsing fails, use the raw response text
-              resolve({
-                text: this.responseText,
-                videoId,
-                videoTitle: "YouTube Video",
-              });
-            }
-          } else {
-            reject(new Error(`YouTube API request failed with status: ${this.status}`));
-          }
-        }
-      });
-      
-      // Set timeout for the request itself
-      xhr.timeout = 15000;
-      xhr.ontimeout = () => {
-        reject(new Error('Request timed out'));
-      };
-      
-      xhr.open('GET', `https://youtube-video-summarizer-gpt-ai.p.rapidapi.com/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`);
-      xhr.setRequestHeader('x-rapidapi-key', RAPID_API_KEY);
-      xhr.setRequestHeader('x-rapidapi-host', 'youtube-video-summarizer-gpt-ai.p.rapidapi.com');
-      
-      xhr.send(null);
+
+    // Use the fast plain text endpoint
+    const response = await fetch(`https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}&text=true`, {
+      method: 'GET',
+      headers: {
+        'x-api-key': SUPADATA_API_KEY,
+      },
     });
+
+    if (!response.ok) {
+      throw new Error(`Supadata API request failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    let transcriptText = "";
+    // Prefer the 'content' field (plain text)
+    if (typeof data.content === 'string') {
+      transcriptText = data.content;
+    } else if (data.transcript) {
+      transcriptText = data.transcript;
+    } else if (Array.isArray(data.segments)) {
+      transcriptText = data.segments.map((segment: any) => segment.text).join(' ');
+    } else {
+      transcriptText = JSON.stringify(data);
+    }
+
+    // Clean up transcript: remove excessive whitespace, trim, etc.
+    transcriptText = transcriptText.replace(/\s+/g, ' ').trim();
+
+    return {
+      text: transcriptText,
+      videoId,
+      videoTitle: data.title || "YouTube Video",
+    };
   } catch (error) {
     console.error("Error extracting YouTube transcript:", error);
     throw error;

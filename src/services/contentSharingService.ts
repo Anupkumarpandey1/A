@@ -1,4 +1,3 @@
-
 import { FlashcardItem, FlowchartData, LearningItem } from "@/types/quizTypes";
 
 // Storage keys
@@ -75,9 +74,10 @@ export const createUnifiedLearningItem = (
   };
 };
 
-// Format and transform share links from lovable.com to learnflow.com
+// Format and transform share links to use current window location
 export const formatShareLink = (path: string): string => {
-  const baseUrl = 'https://learnflow.com';
+  // Get the base URL from the current window location
+  const baseUrl = window.location.origin;
   
   // Remove any existing domain if present
   let cleanPath = path.replace(/^(https?:\/\/)?([^\/]+)/, '');
@@ -92,7 +92,7 @@ export const formatShareLink = (path: string): string => {
 
 // Create a shareable link for a quiz
 export const createQuizShareLink = (quizId: string): string => {
-  return formatShareLink(`/quiz/${quizId}`);
+  return formatShareLink(`/join/${quizId}`);
 };
 
 // Create a shareable link for a learning item

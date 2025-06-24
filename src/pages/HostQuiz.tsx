@@ -8,6 +8,7 @@ import { Award, Users, Play, PauseCircle, ChevronLeft, ChevronRight, Link, Copy,
 import { getQuizSession, getLeaderboard } from "@/services/api";
 import { supabase } from "@/integrations/supabase/client";
 import { QuizQuestion, Participant } from "@/types/quizTypes";
+import { createQuizShareLink } from "@/services/contentSharingService";
 
 const HostQuiz = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -178,7 +179,7 @@ const HostQuiz = () => {
   };
 
   const handleCopyQuizLink = () => {
-    const linkToCopy = `${window.location.origin}/join/${sessionId}`;
+    const linkToCopy = createQuizShareLink(sessionId || "");
     navigator.clipboard.writeText(linkToCopy);
     setIsCopied(true);
     
