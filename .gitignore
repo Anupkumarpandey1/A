@@ -8,7 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+# Build output (ignored by git, built by Netlify)
 dist
+# SSR build output
 dist-ssr
 *.local
 
@@ -22,3 +24,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Netlify config (should NOT be ignored!)
+!netlify.toml
+# SPA redirects (should NOT be ignored!)
+!public/_redirects
