@@ -1,6 +1,6 @@
 // API keys (in production these should be secured in environment variables or server-side)
-export const GEMINI_API_KEY = "AIzaSyAiDJdX6-9uY6wcCAJU52cuvKnpnxlKcAE";
-export const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+export const GEMINI_API_KEY = "AIzaSyCl69iMt0AzmyWJztT2d7ncyB10qiSgul4";
+export const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 export const RAPID_API_KEY = "88e9d73b57msh9982c178daafdb7p1d1688jsn6d4186f6ca5a";
 
 import { supabase } from '@/integrations/supabase/client';
